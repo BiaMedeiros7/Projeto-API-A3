@@ -1,5 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
-    function inicializarBox(box) {
+document.addEventListener('DOMContentLoaded', () => { //js só executa quando o dom estiver td carregado
+    function inicializarBox(box) { // aq configura as funcionalidades para cada box
         const addTarefaBtn = box.querySelector('.addTarefaBtn');
         const inputBoxTarefas = box.querySelector('.inputBoxTarefas');
         const lista = box.querySelector('.lista');
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (feito) li.classList.add('feito'); 
 
            
-            let iconeFeito = document.createElement('img');
+            let iconeFeito = document.createElement('img'); //interações do ícone (escolhido)
             iconeFeito.src = feito ? 'imagens/cheio.png' : 'imagens/vazio.png'; 
             iconeFeito.alt = 'Marcar como feito';
             iconeFeito.classList.add('iconeFeito');
@@ -50,12 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
            
-            let textoTarefa = document.createElement('span');
+            let textoTarefa = document.createElement('span'); //span para exibir o nome da tarefa
             textoTarefa.classList.add('textoTarefa');
             textoTarefa.innerText = tarefaNome;
 
             
-            let btnEditar = document.createElement('button');
+            let btnEditar = document.createElement('button'); //edição da tarefa
             btnEditar.classList.add('btnAcao');
             btnEditar.innerHTML = '<i class="bx bxs-pencil"></i>';
             btnEditar.addEventListener('click', () => {
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             
-            let btnDeletar = document.createElement('button');
+            let btnDeletar = document.createElement('button'); //excluir tarefa
             btnDeletar.classList.add('btnAcao');
             btnDeletar.innerHTML = '<i class="bx bxs-trash bx-tada"></i>';
             btnDeletar.addEventListener('click', () => {
@@ -84,16 +84,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         function addTarefa() {
             let tarefaNome = inputBoxTarefas.value.trim();
-            if (tarefaNome === '') return; // Não permite adicionar tarefa vazia
+            if (tarefaNome === '') return; // não permite adicionar tarefa vazia
             criarTarefa(tarefaNome);
             salvarTarefas();
-            inputBoxTarefas.value = ''; // Limpa o campo de entrada
+            inputBoxTarefas.value = ''; // limpa o campo de entrada
         }
 
         // Função para editar a tarefa diretamente no box
         function editarTarefa(li, textoTarefa) {
-            // Substitui o texto por um campo de input
-            let inputEdicao = document.createElement('input');
+            let inputEdicao = document.createElement('input'); // Substitui o texto por um campo de input
             inputEdicao.type = 'text';
             inputEdicao.value = textoTarefa.innerText;
             inputEdicao.classList.add('inputEdicao');
@@ -130,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        //aqui é o antigo showtask() se não me engano
+       
         carregarTarefas();
     }
 

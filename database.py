@@ -6,27 +6,27 @@ from sqlalchemy import create_engine, Column, Integer, String, SmallInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Configuração do banco de dados (substitua com suas credenciais)
+
 SQLALCHEMY_DATABASE_URL = "mysql+mysqlconnector://root:NovaSenha@localhost/banco-de-dados-api"
 
-# Criação do motor de conexão (engine)
+
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
 
-# Criando uma base para o modelo (mapeamento ORM)
+
 Base = declarative_base()
 
-# Definindo o modelo para a tabela tarefas
+
 class Tarefa(Base):
-    __tablename__ = 'tarefas_api'  # Nome da tabela no banco de dados, alterei para 'tarefas_api'
+    __tablename__ = 'tarefas_api'  
 
     idtarefas_api = Column(Integer, primary_key=True, autoincrement=True)
     nome_tarefa = Column(String(200), nullable=False)
     status_tarefa = Column(SmallInteger, nullable=False)
 
-# Criando uma fábrica de sessões
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Função para criar a tabela no banco de dados
+
 def create_tables():
     Base.metadata.create_all(bind=engine)
 

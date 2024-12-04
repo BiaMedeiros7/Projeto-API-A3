@@ -1,12 +1,7 @@
-from sqlalchemy import Column, Integer, String, Enum
-from sqlalchemy.orm import declarative_base
-from enum import Enum as PyEnum
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
-
-class StatusEnum(PyEnum):
-    PENDENTE = "pendente"
-    CONCLUIDO = "concluido"
 
 class Tarefa(Base):
     __tablename__ = "tarefas_api"
@@ -14,4 +9,4 @@ class Tarefa(Base):
 
     idtarefas_api = Column(Integer, primary_key=True, index=True)
     nome_tarefa = Column(String(200), index=True)
-    status_tarefa = Column(Enum(StatusEnum), nullable=False, default=StatusEnum.PENDENTE)
+    status_tarefa = Column(Integer, nullable=False, default=0)  # 0 para PENDENTE, 1 para CONCLUÍDO

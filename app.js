@@ -1,41 +1,43 @@
-// Função para carregar as tarefas assim que a página é carregada
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('http://127.0.0.1:8000/tarefas')
-        .then(response => response.json())
-        .then(tarefas => {
-            tarefas.forEach(tarefa => {
-                // Aqui, você popula a tarefa em uma box específica
-                adicionarTarefaNaBox(tarefa.nome_tarefa, tarefa.idtarefas_api, tarefa.status_tarefa);
-            });
-        })
-        .catch(error => console.error('Erro ao carregar tarefas:', error));
+    
+    document.querySelectorAll('.box').forEach((box) => {
+        inicializarBox(box);
+    });
 });
-
-// Função para adicionar tarefa na box específica
-function adicionarTarefaNaBox(nome, id, status) {
-    const box = document.querySelector(`.box[data-id="${id}"]`); // Seleciona a box com o id correto
-    const tarefaElement = box.querySelector('.task'); // Encontra o elemento que deve exibir o nome da tarefa
-    tarefaElement.textContent = nome; // Atualiza o nome da tarefa na box
-}
 
 function inicializarBox(box) {
     const addTarefaBtn = box.querySelector('.addTarefaBtn');
     const inputBoxTarefas = box.querySelector('.inputBoxTarefas');
     const lista = box.querySelector('.lista');
 
-    // Função para carregar tarefas do servidor
+    
     function carregarTarefas() {
-        fetch('http://127.0.0.1:8000/tarefas')
+        const boxId = box.dataset.id;  
+        if (!boxId) {
+            console.error('Box não encontrada ou não tem dataset.id');
+            return;
+        }
+
+        fetch(`http://127.0.0.1:8000/tarefas/${boxId}`)
             .then(response => response.json())
             .then(tarefas => {
-                tarefas.forEach(tarefa => {
-                    criarTarefa(tarefa.nome_tarefa, tarefa.status_tarefa === 1, tarefa.idtarefas_api);
-                });
+                console.log(tarefas);  
+                lista.innerHTML = '';  
+                if (Array.isArray(tarefas)) {
+                    tarefas.forEach(tarefa => {
+                        criarTarefa(tarefa.nome_tarefa, tarefa.status_tarefa, tarefa.idtarefas_api);
+                    });
+                } else {
+                    console.error('Formato inválido de resposta:', tarefas);
+                }
             })
             .catch(error => console.error('Erro ao carregar tarefas:', error));
     }
 
-    // Criar elemento de tarefa na lista
+    
+    carregarTarefas();
+
+    
     function criarTarefa(tarefaNome, feito = false, idTarefa = null) {
         let li = document.createElement('li');
         li.classList.add('tarefaItem');
@@ -47,26 +49,31 @@ function inicializarBox(box) {
         iconeFeito.alt = 'Marcar como feito';
         iconeFeito.classList.add('iconeFeito');
 
-        // Alternar status da tarefa (feito/pendente)
+        
         iconeFeito.addEventListener('click', () => {
-            let novoStatus = li.classList.contains('feito') ? 0 : 1;
-
+            const novoStatus = li.classList.contains('feito') ? 0 : 1;  
+        
+            
+            li.classList.toggle('feito');
+            iconeFeito.src = novoStatus === 1 ? 'imagens/cheio.png' : 'imagens/vazio.png';
+        
+            
             fetch(`http://127.0.0.1:8000/tarefas/${li.dataset.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    nome_tarefa: li.querySelector('.textoTarefa').innerText.trim(),  // Enviar o nome da tarefa
-                    status_tarefa: novoStatus  // Enviar o novo status
+                    nome_tarefa: li.querySelector('.textoTarefa').innerText.trim(),  
+                    status_tarefa: novoStatus,  
+                    box_id: box.dataset.id  
                 })
             })
             .then(response => response.json())
             .then(() => {
-                li.classList.toggle('feito');
-                iconeFeito.src = novoStatus === 1 ? 'imagens/cheio.png' : 'imagens/vazio.png';
+                console.log('Tarefa atualizada no servidor.');
             })
             .catch(error => console.error('Erro ao atualizar a tarefa:', error));
         });
-
+        
         let textoTarefa = document.createElement('span');
         textoTarefa.classList.add('textoTarefa');
         textoTarefa.innerText = tarefaNome;
@@ -82,7 +89,6 @@ function inicializarBox(box) {
         btnDeletar.classList.add('btnAcao');
         btnDeletar.innerHTML = '<i class="bx bxs-trash bx-tada"></i>';
         btnDeletar.addEventListener('click', () => {
-            // Corrigir URL do DELETE:
             fetch(`http://127.0.0.1:8000/tarefas/${li.dataset.id}`, { method: 'DELETE' })
                 .then(() => {
                     li.remove();
@@ -98,69 +104,85 @@ function inicializarBox(box) {
         lista.appendChild(li);
     }
 
-    // Adicionar nova tarefa
+    
     function addTarefa() {
-        let tarefaNome = inputBoxTarefas.value.trim();
-        if (tarefaNome === '') return;
+        let tarefaNome = inputBoxTarefas.value.trim(); 
+        if (tarefaNome === '') return; 
 
+        const boxId = box.dataset.id; 
+
+        
         fetch('http://127.0.0.1:8000/tarefas', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nome_tarefa: tarefaNome, status_tarefa: 0 })
+            body: JSON.stringify({ 
+                nome_tarefa: tarefaNome, 
+                status_tarefa: 0, 
+                box_id: boxId  
+            })
         })
-        .then(response => response.json())
+        .then(response => response.json())  
         .then(tarefa => {
+            
             criarTarefa(tarefa.nome_tarefa, false, tarefa.idtarefas_api);
-            inputBoxTarefas.value = '';
+            inputBoxTarefas.value = ''; 
         })
         .catch(error => console.error('Erro ao adicionar tarefa:', error));
     }
 
-    // Editar tarefa
+    
     function editarTarefa(li, textoTarefa) {
         let inputEdicao = document.createElement('input');
         inputEdicao.type = 'text';
         inputEdicao.value = textoTarefa.innerText;
         inputEdicao.classList.add('inputEdicao');
 
-        // Substituir o texto com o input de edição
         li.replaceChild(inputEdicao, textoTarefa);
 
         inputEdicao.addEventListener('blur', () => {
-            // Verificar se o li ainda existe
-            if (li) {
+            textoTarefa.innerText = inputEdicao.value.trim();
+            li.replaceChild(textoTarefa, inputEdicao);
+            atualizarTarefa(li.dataset.id, textoTarefa.innerText.trim());
+        });
+
+        inputEdicao.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
                 textoTarefa.innerText = inputEdicao.value.trim();
                 li.replaceChild(textoTarefa, inputEdicao);
                 atualizarTarefa(li.dataset.id, textoTarefa.innerText.trim());
             }
         });
 
-        inputEdicao.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                // Verificar se o li ainda existe
-                if (li) {
-                    textoTarefa.innerText = inputEdicao.value.trim();
-                    li.replaceChild(textoTarefa, inputEdicao);
-                    atualizarTarefa(li.dataset.id, textoTarefa.innerText.trim());
-                }
-            }
-        });
-
         inputEdicao.focus();
     }
 
-    // Atualizar tarefa no servidor
+    
     function atualizarTarefa(idTarefa, novoNome) {
-        fetch(`http://127.0.0.1:8000/tarefas/${idTarefa}`, {
+        
+        const tarefa = {
+            id: idTarefa,
+            nome_tarefa: novoNome,
+            status_tarefa: 0, 
+            box_id: box.dataset.id 
+        };
+
+        fetch(`http://127.0.0.1:8000/tarefas/${tarefa.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nome_tarefa: novoNome, status_tarefa: 0 })
+            body: JSON.stringify({
+                nome_tarefa: tarefa.nome_tarefa,
+                status_tarefa: tarefa.status_tarefa,
+                box_id: tarefa.box_id 
+            })
         })
         .then(response => response.json())
+        .then(() => {
+            console.log('Tarefa atualizada com sucesso!');
+        })
         .catch(error => console.error('Erro ao atualizar tarefa:', error));
     }
 
-    // Eventos para adicionar tarefas
+    
     addTarefaBtn.addEventListener('click', addTarefa);
 
     inputBoxTarefas.addEventListener('keypress', (e) => {
@@ -168,12 +190,4 @@ function inicializarBox(box) {
             addTarefa();
         }
     });
-
-    carregarTarefas();  // Carregar as tarefas quando a caixa é inicializada
 }
-
-// Inicializar todas as caixas
-document.querySelectorAll('.box').forEach((box) => {
-    inicializarBox(box);
-});
-

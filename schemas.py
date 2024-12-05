@@ -1,29 +1,27 @@
-# arq de validação de dados
 from pydantic import BaseModel
 from typing import Optional
-from pydantic import BaseModel
 
 class TarefaCreate(BaseModel):
     nome_tarefa: str
-    status_tarefa: int = 0  # Padrão para PENDENTE
+    status_tarefa: int = 0  
+    box_id: int  
 
     class Config:
-        from_attributes = True
+        orm_mode = True  
+
+class TarefaUpdate(BaseModel):
+    nome_tarefa: str
+    status_tarefa: int
+    box_id: int  
+
+    class Config:
+        orm_mode = True
 
 class TarefaOut(BaseModel):
     idtarefas_api: int
     nome_tarefa: str
     status_tarefa: int
+    box_id: int  
 
     class Config:
-        from_attributes = True
-
-
-class TarefaUpdate(BaseModel):
-    nome_tarefa: str
-    status_tarefa: int
-
-
-    class Config:
-        from_attributes = True
-
+        orm_mode = True
